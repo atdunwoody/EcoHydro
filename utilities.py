@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 
 class AirParcel:
-    def __init__(self, temperature, pressure, T_dew = None, RH = None, rho_v = None, psy = None):
-        self.T = temperature  # Temperature in degrees Celsius
-        self.P = pressure  # Pressure in kPa    
+    def __init__(self, T, P = None, T_dew = None, RH = None, rho_v = None, psy = None):
+        self.T = T  # Temperature in degrees Celsius
+        self.P = P  # Pressure in kPa    
         self.T_dew = T_dew  # Dewpoint temperature in degrees Celsius
         self.RH = RH
         self.rho_v = rho_v
@@ -18,20 +18,20 @@ class AirParcel:
         self.K = 273.15  # Conversion factor from Celsius to Kelvin
     
         self.e_sat = self.calc_esat() # Saturation vapor pressure in kPa    
-        self.e = self.calc_e(T_dew = T_dew, RH = RH, rho_v = rho_v) # Vapor pressure in kPa
-        self.T_dew = T_dew if T_dew is not None else self.calc_dewpoint() # Dewpoint temperature in degrees Celsius
-        self.RH = RH if RH is not None else self.calc_RH() # Relative humidity in percent
-        self.rho_v = rho_v if rho_v is not None else self.calc_rho_v()
-
-
-        self.rho_d = self.calc_rho_d() # Dry air density in g/m^3
-        self.rho = self.calc_rho() # Air density in kg/m^3
-        
+        self.e = None if RH is None and rho_v is None else self.calc_e() # Vapor pressure in kPa
         self.LH = self.calc_LH() # Latent heat of vaporization in MJ/kg
-        self.psy =  psy if psy is not None else self.calc_psy() # Psychrometric constant in kPa/°C
-        self.T_wet = self.calc_wetbulb() # Wetbulb temperature in degrees Celsius
-        self.specific_humidity = self.calc_specific_humidity() # Specific humidity in g/g
-        self.mixing_ratio = self.calc_mixing_ratio() # Mixing ratio in g/g
+
+        self.T_dew = T_dew if T_dew is not None or self.e is None else self.calc_dewpoint() # Dewpoint temperature in degrees Celsius
+        self.RH = RH if RH is not None or self.e is None else self.calc_RH() # Relative humidity in percent
+        self.rho_v = rho_v if rho_v is not None or self.e is None else self.calc_rho_v()
+        self.psy =  psy if psy is not None or self.P is None else self.calc_psy() # Psychrometric constant in kPa/°C
+
+        self.rho_d = None if P is None else self.calc_rho_d() # Dry air density in g/m^3
+        self.rho = None if P is None else self.calc_rho() # Air density in kg/m^3
+        
+        self.T_wet = None if self.psy is None else self.calc_wetbulb() # Wetbulb temperature in degrees Celsius
+        self.specific_humidity = None if self.rho_d is None else self.calc_specific_humidity() # Specific humidity in g/g
+        self.mixing_ratio = None if self.rho_d is None else self.calc_mixing_ratio() # Mixing ratio in g/g
        
 
     def __repr__(self):
@@ -83,19 +83,20 @@ class AirParcel:
         rho_d = self.P / (self.R_d * (self.T + self.K))
         return rho_d
 
-    def calc_e(self, T_dew, RH, rho_v):
+    def calc_e(self, mode = "RH"):
         """
         Calculate vapor pressure from temperature
         return: vapor pressure in kPa
         """
-        if T_dew is not None:    
-            e = 0.6108 * np.exp(17.27 * T_dew / (T_dew + 237.3))
-        elif RH is not None:
-            e = self.RH * self.e_sat
-        elif rho_v is not None:
+        if mode == "RH": 
+            try:
+                e = self.RH * self.e_sat
+            except:
+                e = None
+        elif mode == "T_dew":
+            e = 0.6108 * np.exp(17.27 * self.T_dew / (self.T_dew + 237.3))
+        elif mode == "rho_v":
             e = self.rho_v*self.R_v*(self.T + self.K)
-        else:
-            raise ValueError("Please provide a dewpoint temperature, relative humidity, or vapor density")
         return e    
 
     def calc_esat(self, T = None):
@@ -260,11 +261,11 @@ class SolarRadiation:
         return radiation_flux
 
 class SurfaceRadiation:
-    def __init__(self): 
-        self.RH = None # Relative humidity as a fraction
-        self.e = None # Vapor pressure in kPa
-        self.T_a = None # Air temperature in degrees Celsius
+    def __init__(self, T_a): 
+        self.T_a = T_a # Air temperature in degrees Celsius
         self.T_s = None # Surface temperature in degrees Celsius
+        self.RH = 0.66 # Relative humidity as a fraction
+        self.e = None # Vapor pressure in kPa
         self.emmisivity = None # Emmisivity of the surface
         self.S_in = None # Incident short wave solar radiation in cal / cm^2 / day
         self.LW = None # Long wave radiation in W/m^2
@@ -277,26 +278,7 @@ class SurfaceRadiation:
         self.f = 1 # (1 = cloudless sky) Empirical cloud factor calculkated from 5.24 or 5.25 in TH
         self.sigma = 5.67 * (10**-8) #stefan boltzmann constant in W/m^2/K^4
         self.Kelvin = 273.15 # Conversion factor from Celsius to Kelvin
-
-
-    def calc_e(self):
-        """
-        Calculate vapor pressure from relative humidity and saturation vapor pressure
-        RH: relative humidity as a fraction
-        e_sat: saturation vapor pressure in kPa
-        return: vapor pressure in kPa
-        """
-        e = self.RH * self.e_sat
-        return e
-
-    def calc_e_sat(self):
-        """
-        Calculate saturation vapor pressure from air temperature
-        T_a: air temperature in degrees Celsius
-        return: saturation vapor pressure in kPa
-        """
-        e_sat = 0.6108 * np.exp(17.27 * self.T_a / (self.T_a + 237.3))
-        return e_sat
+        self.parcel = AirParcel(self.T_a)  # Temperature in C, Pressure in kPa, Dewpoint in C, RH in fraction, psy in kPa/°C
 
     def calc_LW(self):
         """
@@ -317,8 +299,13 @@ class SurfaceRadiation:
         return: long wave radiation in W/m^2
         """
         #Equation 5.23 in TH
-        self.e_sat = self.calc_e_sat()
-        self.e = self.calc_e()
+        self.parcel.RH = self.RH
+        print(f"Relative Humidity: {self.parcel.RH}")
+        self.e_sat = self.parcel.calc_esat()
+        print(f"Saturation Vapor Pressure: {self.e_sat:.2f} kPa")
+        self.e = self.parcel.calc_e()
+        print(f"Vapor Pressure: {self.e:.2f} kPa")
+
         eff_emmisivity = 0.34 - 0.14 * np.sqrt(self.e)
         LW_net = self.f * eff_emmisivity * self.sigma * (self.T_a + self.Kelvin)**4
         return LW_net
@@ -361,9 +348,9 @@ class SurfaceRadiation:
         return H
 #============================Question 1=======================================
 
-parcel = AirParcel(32, 95, RH = 0.5, psy = 66/1000)  # Temperature in C, Pressure in kPa, Dewpoint in C, RH in fraction, psy in kPa/°C
+#parcel = AirParcel(32, 95, RH = 0.5, psy = 66/1000)  # Temperature in C, Pressure in kPa, Dewpoint in C, RH in fraction, psy in kPa/°C
 
-parcel.__repr__()
+#parcel.__repr__()
 
 
 #============================Question 3=======================================
@@ -408,7 +395,7 @@ if False:
 
 #============================Question 4=======================================
 
-surf = SurfaceRadiation()
+surf = SurfaceRadiation(17.94) # Air temperature in degrees Celsius
 
 day_to_sec = 24*60*60 # Conversion factor from days to seconds
 cal_to_W = 4.184 # Conversion factor from cal to W
@@ -416,7 +403,6 @@ cm2_to_m2 = 10**-4 # Conversion factor from cm^2 to m^2
 S_in = 468 # Incident short wave solar radiation in cal / cm^2 / day
 surf.S_in = 468 * cal_to_W * cm2_to_m2 / day_to_sec # Conversion factor from cal/cm^2/day to W/m^2
 surf.RH = 0.66 # Relative humidity as a fraction
-surf.T_a = 17.94 # Air temperature in degrees Celsius
 surf.T_s = surf.T_a # Surface temperature is equal to air temperature
 surf.albedo = 0.23 # From Table 5.2 Albedo for short grass chosen from middle of range
 surf.LW_net = surf.calc_LW_net()
