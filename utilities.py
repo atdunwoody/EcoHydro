@@ -32,7 +32,7 @@ class AirParcel:
         self.T_wet = None if self.psy is None else self.calc_wetbulb() # Wetbulb temperature in degrees Celsius
         self.specific_humidity = None if self.rho_d is None else self.calc_specific_humidity() # Specific humidity in g/g
         self.mixing_ratio = None if self.rho_d is None else self.calc_mixing_ratio() # Mixing ratio in g/g
-       
+        self.T_v = None if self.mixing_ratio is None else self.calc_virtual_temp() # Virtual temperature in degrees Celsius
 
     def __repr__(self):
         print(f"Temperature: {self.T} C")
@@ -131,6 +131,17 @@ class AirParcel:
         RH = (self.e / self.e_sat)
         return RH
     
+    @staticmethod
+    def calc_psy_const(P,LH):
+        """
+        γ = psychrometric constant
+        Calculate psychrometric constant from temperature
+        T: temperature in degrees Celsius
+        """
+        c_p = 1.013  # kJ/kg/K, specific heat of dry air at constant pressure
+        psychrometric_constant = c_p * P / (0.622 * LH)
+        return psychrometric_constant
+
     def calc_psy(self):
         """
         γ = psychrometric constant
@@ -192,6 +203,18 @@ class AirParcel:
         """
         r = self.rho_v / self.rho_d
         return r
+    def calc_virtual_temp(self):
+        """
+        Calculate virtual temperature from temperature and mixing ratio
+        T: temperature in degrees Celsius
+        r: mixing ratio in g/kg
+        return: virtual temperature in degrees Celsius
+        """
+        try:
+            T_v = self.T * (1 + 0.61 * self.mixing_ratio)
+        except:
+            T_v = self.T * (1 + 0.61 * self.specific_humidity)
+        return T_v
 
 class SolarRadiation:
     def __init__(self, latitude, day_of_year, time_of_day = None, solar_constant = 1367):
@@ -346,93 +369,98 @@ class SurfaceRadiation:
         """
         H = self.R_n - self.E - self.G
         return H
-#============================Question 1=======================================
 
-#parcel = AirParcel(32, 95, RH = 0.5, psy = 66/1000)  # Temperature in C, Pressure in kPa, Dewpoint in C, RH in fraction, psy in kPa/°C
+def main():
+    #============================Question 1=======================================
 
-#parcel.__repr__()
+    #parcel = AirParcel(32, 95, RH = 0.5, psy = 66/1000)  # Temperature in C, Pressure in kPa, Dewpoint in C, RH in fraction, psy in kPa/°C
+
+    #parcel.__repr__()
 
 
-#============================Question 3=======================================
-if False:
-    fc = 40.585258 # Latitude of Fort Collins, CO
-    ep = 31.761877 # Latitude of El Paso, TX
-    day = 38 #February 7th is the 38th day of the year
+    #============================Question 3=======================================
+    if False:
+        fc = 40.585258 # Latitude of Fort Collins, CO
+        ep = 31.761877 # Latitude of El Paso, TX
+        day = 38 #February 7th is the 38th day of the year
 
-    fc_rad = SolarRadiation(fc, day)  # 40 degrees latitude, on February 7th
-    ep_rad = SolarRadiation(ep, day)  # 31 degrees latitude, on February 7th
-    fc_rad.latitude = 100
+        fc_rad = SolarRadiation(fc, day)  # 40 degrees latitude, on February 7th
+        ep_rad = SolarRadiation(ep, day)  # 31 degrees latitude, on February 7th
+        fc_rad.latitude = 100
 
-    fc_yearly_rad =[]
-    ep_yearly_rad = []
-    #Create a list of daily radiation flux for Fort Collins and El Paso
-    for i in range(365):
-        fc_rad = SolarRadiation(fc, i)
-        ep_rad = SolarRadiation(ep, i)
-        fc_yearly_rad.append(fc_rad.radiation_flux())
-        ep_yearly_rad.append(ep_rad.radiation_flux())
+        fc_yearly_rad =[]
+        ep_yearly_rad = []
+        #Create a list of daily radiation flux for Fort Collins and El Paso
+        for i in range(365):
+            fc_rad = SolarRadiation(fc, i)
+            ep_rad = SolarRadiation(ep, i)
+            fc_yearly_rad.append(fc_rad.radiation_flux())
+            ep_yearly_rad.append(ep_rad.radiation_flux())
 
-    #Plot the radiation flux for Fort Collins and El Paso
-    sns.set()  # This sets the seaborn style
-    plt.figure(figsize=(10, 6))  # You can adjust the figure size as needed
+        #Plot the radiation flux for Fort Collins and El Paso
+        sns.set()  # This sets the seaborn style
+        plt.figure(figsize=(10, 6))  # You can adjust the figure size as needed
 
-    # Creating lineplots
-    sns.lineplot(x=range(365), y=fc_yearly_rad, label="Fort Collins")
-    sns.lineplot(x=range(365), y=ep_yearly_rad, label="El Paso")
+        # Creating lineplots
+        sns.lineplot(x=range(365), y=fc_yearly_rad, label="Fort Collins")
+        sns.lineplot(x=range(365), y=ep_yearly_rad, label="El Paso")
 
-    # Adding title and labels
-    plt.title("Daily Extraterrestrial Solar Radiation ")
-    plt.xlabel("Day of Year")
-    plt.ylabel(r"Incident Radiation (W/m$^2$)")
+        # Adding title and labels
+        plt.title("Daily Extraterrestrial Solar Radiation ")
+        plt.xlabel("Day of Year")
+        plt.ylabel(r"Incident Radiation (W/m$^2$)")
 
-    # Setting the axis limits
-    plt.xlim(0, 365)
-    plt.ylim(0, 1000)
+        # Setting the axis limits
+        plt.xlim(0, 365)
+        plt.ylim(0, 1000)
 
-    # Showing the legend and plot
-    plt.legend()
-    plt.show()
+        # Showing the legend and plot
+        plt.legend()
+        plt.show()
 
-#============================Question 4=======================================
+    #============================Question 4=======================================
 
-surf = SurfaceRadiation(17.94) # Air temperature in degrees Celsius
+    surf = SurfaceRadiation(17.94) # Air temperature in degrees Celsius
 
-day_to_sec = 24*60*60 # Conversion factor from days to seconds
-cal_to_W = 4.184 # Conversion factor from cal to W
-cm2_to_m2 = 10**-4 # Conversion factor from cm^2 to m^2
-S_in = 468 # Incident short wave solar radiation in cal / cm^2 / day
-surf.S_in = 468 * cal_to_W * cm2_to_m2 / day_to_sec # Conversion factor from cal/cm^2/day to W/m^2
-surf.RH = 0.66 # Relative humidity as a fraction
-surf.T_s = surf.T_a # Surface temperature is equal to air temperature
-surf.albedo = 0.23 # From Table 5.2 Albedo for short grass chosen from middle of range
-surf.LW_net = surf.calc_LW_net()
-surf.R_n = surf.calc_R_n()
-print("Question 4")
-print(f"Net Radiation: {surf.R_n:.0f} W/m^2\n")
+    day_to_sec = 24*60*60 # Conversion factor from days to seconds
+    cal_to_W = 4.184 # Conversion factor from cal to W
+    cm2_to_m2 = 10**-4 # Conversion factor from cm^2 to m^2
+    S_in = 468 # Incident short wave solar radiation in cal / cm^2 / day
+    surf.S_in = 468 * cal_to_W * cm2_to_m2 / day_to_sec # Conversion factor from cal/cm^2/day to W/m^2
+    surf.RH = 0.66 # Relative humidity as a fraction
+    surf.T_s = surf.T_a # Surface temperature is equal to air temperature
+    surf.albedo = 0.23 # From Table 5.2 Albedo for short grass chosen from middle of range
+    surf.LW_net = surf.calc_LW_net()
+    surf.R_n = surf.calc_R_n()
+    print("Question 4")
+    print(f"Net Radiation: {surf.R_n:.0f} W/m^2\n")
 
-#============================Question 5=======================================
-"""
-Consider the following observations: net radiation Rn = 200 Wm-2; heat flux into the ground, G = 40 Wm-2; and evaporation rate, E = 5 10-8 ms-1.
-a)	Calculate the turbulent sensible heat flux, H, in Wm-2
-b)	Was the atmosphere stable or unstable? Why?
-c)	Was the soil warming up or cooling down? Why?
+    #============================Question 5=======================================
+    """
+    Consider the following observations: net radiation Rn = 200 Wm-2; heat flux into the ground, G = 40 Wm-2; and evaporation rate, E = 5 10-8 ms-1.
+    a)	Calculate the turbulent sensible heat flux, H, in Wm-2
+    b)	Was the atmosphere stable or unstable? Why?
+    c)	Was the soil warming up or cooling down? Why?
 
-"""
+    """
 
-E = 5 * 10**-8 # Evaporation rate in m/s
-E = E * 1000 / (24 * 60 * 60)  # Conversion factor from m/s to mm/day
-E = E * 28.6 # 1 mm/day is equivalent to 28.6 W m−2
-surf.E = E
-surf.R_n = 200 # Net radiation in W/m^2
-surf.G = 40 # Heat flux into the ground in W/m^2
-surf.H = surf.calc_H()
-#Answer to a
-#print("Question 5")
-#print(f"Turbulent Sensible Heat Flux: {surf.H:.2f} W/m^2")
+    E = 5 * 10**-8 # Evaporation rate in m/s
+    E = E * 1000 * (24 * 60 * 60)  # Conversion factor from m/s to mm/day
+    E = E * 28.6 # 1 mm/day is equivalent to 28.6 W m−2
+    surf.E = E
+    surf.R_n = 200 # Net radiation in W/m^2
+    surf.G = 40 # Heat flux into the ground in W/m^2
+    surf.H = surf.calc_H()
+    #Answer to a
+    #print("Question 5")
+    #print(f"Turbulent Sensible Heat Flux: {surf.H:.2f} W/m^2")
 
-#Answer to b
-#The atmosphere is unstable because the net radiation is positive, which means the surface is warmer than the air above it
-# This will cause the air to rise and the atmosphere to be unstable.
+    #Answer to b
+    #The atmosphere is unstable because the net radiation is positive, which means the surface is warmer than the air above it
+    # This will cause the air to rise and the atmosphere to be unstable.
 
-#Answer to c
-#The soil is warming up because the net radiation is positive and the heat flux into the ground is positive.
+    #Answer to c
+    #The soil is warming up because the net radiation is positive and the heat flux into the ground is positive.
+
+if __name__ == "main":
+    main()
