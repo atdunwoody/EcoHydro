@@ -119,7 +119,9 @@ def toymodel(DATA, PAR):
     S0 = 0.2  # Initial storage for all reservoirs
 
     # Initial conditions for storage in each reservoir
-    Su_dt, Ss_dt, Sf_dt = S0 # Assume an initial storage value
+    Su_dt = S0
+    Ss_dt = S0
+    Sf_dt = S0 # Assume an initial storage value
 
     # Main flow routine
     for t in range(M):

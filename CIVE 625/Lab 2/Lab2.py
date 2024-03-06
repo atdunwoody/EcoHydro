@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import Rso_calc
+from Rso_calc import Rso_calc
+import toymodel as tm
 
 # 1 - Load Data
 Q = np.loadtxt('CIVE 625/Lab 2/Data/Q_mm.csv', delimiter=',')   # Q in mm
@@ -96,7 +97,7 @@ INPUT[:, 1] = E_RC_mm[:, pick_catchment]
 PAR = [50, 450, 5, 1]  # Parameters
 
 # Assuming toymodel is defined elsewhere
-Ea, QF, R, QS, QT, Sf, Su, Ss, St, AL, IE, SE = toymodel(INPUT, PAR)
+Ea, QF, R, QS, QT, Sf, Su, Ss, St, AL, IE, SE = tm.toymodel(INPUT, PAR)
 
 Su_max = PAR[1]
 
