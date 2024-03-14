@@ -55,6 +55,8 @@ Rn_RC_mm = Rn_RC * Wm2_mm
 # Plot Example
 from_index = 500
 to_index = 800
+
+# Run Hydrologic Model
 pick_catchment = 7  # Python indexing starts from 0
 
 INPUT = np.zeros((Precip.shape[0], 2))
@@ -70,16 +72,16 @@ Su_max = PAR[1]
 
 plt.figure(1)
 plt.clf()
-
 plt.subplot(1, 2, 1)
 plt.plot(Q[from_index:to_index, pick_catchment], '-b', label='Observed')
 plt.plot(QT[from_index:to_index], '-k', label='Simulated')
 plt.legend()
 plt.ylabel('mm')
 plt.xlabel('days')
-
 plt.subplot(1, 2, 2)
 plt.xlabel('days')
+
+# Plot first dataset on primary y-axis
 p1, = plt.plot(Su[from_index:to_index] / Su_max, '.-b', label='Su/Su_max')
 plt.ylabel('[-]', color='b')  # Set y-label color to blue to match the data
 plt.tick_params(axis='y', colors='b')  # Set tick color to blue to match the data
@@ -95,3 +97,5 @@ plt.show()
 
 #save plt to CIVE 625\Lab 2\Results\Catchment 13.png
 #plt.savefig('CIVE 625\Lab 2\Results\Catchment 13.png')
+
+print(Su)
