@@ -110,13 +110,30 @@ plt.legend()
 plt.ylabel('mm')
 plt.xlabel('days')
 
+
 plt.subplot(1, 2, 2)
-plt.plot(Su[from_index:to_index] / Su_max, '.-b', label='Su/Su_max')
-plt.ylabel('[-]')
-plt.twinx()
-plt.plot(Ea[from_index:to_index], '.-r', label='ET')
-plt.legend()
-plt.ylabel('mm')
 plt.xlabel('days')
 
-plt.show()
+# Plot first dataset on primary y-axis
+p1, = plt.plot(Su[from_index:to_index] / Su_max, '.-b', label='Su/Su_max')
+plt.ylabel('[-]', color='b')  # Set y-label color to blue to match the data
+plt.tick_params(axis='y', colors='b')  # Set tick color to blue to match the data
+
+# Create secondary y-axis for the second dataset
+ax2 = plt.twinx()
+p2, = ax2.plot(Ea[from_index:to_index], '.-r', label='ET')
+ax2.set_ylabel('mm', color='r')  # Set y-label color to red to match the data
+ax2.tick_params(axis='y', colors='r')  # Set tick color to red to match the data
+
+# Manually create the legend by combining handles from both axes
+handles = [p1, p2]
+labels = [h.get_label() for h in handles]
+# You can adjust the legend's location by changing the `loc` parameter
+plt.legend(handles, labels, loc='upper left')
+
+#plt.show()
+
+#save plt to CIVE 625\Lab 2\Results\Catchment 13.png
+plt.savefig('CIVE 625\Lab 2\Results\Catchment 13.png')
+
+print(Su)

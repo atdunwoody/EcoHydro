@@ -143,6 +143,6 @@ def toymodel(DATA, PAR):
     return Ea, QF, R, QS, QT, Sf, Su, Ss, St, AL, IE, SE
 
 def main():
-    r = ''
+    pass
 if __name__ == "__main__":
     main()
