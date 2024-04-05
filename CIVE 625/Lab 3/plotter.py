@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
-def Plot_gSM(FC, WP, SMo):
+def plot_gSM(FC, WP, SMo):
     # Define the function
     def g_SM_calc(FC, WP, SM):
         return np.minimum(np.maximum((SM - WP) / (FC - WP), 0), 1)
@@ -13,11 +12,11 @@ def Plot_gSM(FC, WP, SMo):
     SM_SMo_ratio = SM / SMo
 
     # Plotting
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(15, 6))
 
     # Plot 1: g_SM vs SM/SMo
     plt.subplot(1, 2, 1)
-    plt.plot(SM_SMo_ratio, g_SM, 'LineWidth', 2)
+    plt.plot(SM_SMo_ratio, g_SM, linewidth=2)  # Use `linewidth` instead of 'LineWidth'
     plt.xlabel('SM / SMo')
     plt.ylabel('g_{SM}')
     plt.title('Plot of g_{SM} versus SM / SMo')
@@ -26,57 +25,55 @@ def Plot_gSM(FC, WP, SMo):
 
     # Plot 2: g_SM vs SM
     plt.subplot(1, 2, 2)
-    plt.plot(SM, g_SM, 'LineWidth', 2)
+    plt.plot(SM, g_SM, linewidth=2)  # Use `linewidth` instead of 'LineWidth'
     plt.xlabel('SM')
     plt.ylabel('g_{SM}')
     plt.grid(True)
     plt.axis([0, SMo * 2, 0, 1])  # Adjust the axis limits as necessary
 
     plt.show()
+    
+def plot_FFC(Dates, QT, label, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # Convert Dates and QT to a pandas Series object
+    QT_series = pd.Series(QT, index=Dates)
+
+    # Group by year and get the annual maximum streamflow
+    annual_max_flows = QT_series.groupby(QT_series.index.year).max()
+
+    # Sort the annual maximum flows in descending order
+    sorted_max_flows = annual_max_flows.sort_values(ascending=False)
+
+    # Calculate exceedance probability and return periods
+    n_years = len(sorted_max_flows)
+    exceedance_prob = np.arange(1, n_years + 1) / n_years
+    return_periods = 1 / exceedance_prob
+
+    # Plotting
+    ax.loglog(return_periods, sorted_max_flows, 'o-', label=label)
+    ax.set_xlabel('Return Period (years)')
+    ax.set_ylabel('Annual Maximum Streamflow (mm/d)')
+    ax.grid(True)
+    ax.legend()
 
 def plot_FDC(*args):
-    plt.figure(4, figsize=(8.27, 1.84))  # Size in inches
+    plt.figure(4, figsize=(10, 4))  # Adjust figure size as needed
+    plt.clf()
 
     for i, data in enumerate(args):
-        QT_sorted = np.sort(data)[::-1]
-        permanence = np.arange(1, len(QT_sorted) + 1) / len(QT_sorted)
-
+        QT_sorted = np.sort(data)[::-1]  # Sort data in descending order
+        permanence = np.arange(1, len(QT_sorted) + 1) / len(QT_sorted)  # Calculate permanence
         if i == 0:
-            plt.semilogy(permanence, QT_sorted, '-k', linewidth=1, label='Simulation 1')
+            plt.semilogy(permanence, QT_sorted, '-k', linewidth=1, label=sim1_label)
         else:
-            plt.semilogy(permanence, QT_sorted, '-r', linewidth=1, label='Simulation 2')
+            plt.semilogy(permanence, QT_sorted, '-r', linewidth=1, label=sim2_label)
 
     plt.ylabel('Q (mm/d)')
     plt.xlabel('% of Time Exceeded')
     plt.legend()
     plt.grid(True)
-    plt.tight_layout()
+    plt.axis('tight')
     plt.show()
 
-
-
-def plot_FFC(Dates, QT, figureTitle):
-    # Ensure QT is a column vector
-    QT = np.array(QT).flatten()
-    Dates = pd.to_datetime(Dates)
-    unique_years = Dates.year.unique()
-
-    annual_max_flows = []
-
-    for year in unique_years:
-        streamflow_year = QT[Dates.year == year]
-        if len(streamflow_year) > 0:
-            annual_max_flows.append(max(streamflow_year))
-
-    sorted_max_flows = np.sort(annual_max_flows)[::-1]
-    n_years = len(unique_years)
-    exceedance_prob = np.arange(1, n_years + 1) / n_years
-    return_periods = 1 / exceedance_prob
-
-    plt.figure()
-    plt.loglog(return_periods, sorted_max_flows, 'o-k')
-    plt.title(figureTitle)
-    plt.xlabel('Return Period (years)')
-    plt.ylabel('Annual Maximum Streamflow (mm/d)')
-    plt.grid(True)
-    plt.show()

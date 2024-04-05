@@ -1,9 +1,11 @@
 def weighted_average_outputs(OUT_A, OUT_B, weight_A, weight_B):
     OUT = {}
-    for key in OUT_A.keys():
-        if key in ['P', 'Ep']:  # Assuming P and Ep are not to be averaged but taken from OUT_A
-            OUT[key] = OUT_A[key]
-        else:
-            OUT[key] = weight_A * OUT_A[key] + weight_B * OUT_B[key]
-    return OUT
+    fields = ['Ea', 'QF', 'R', 'QS', 'QT', 'Sf', 'Su', 'Ss', 'St', 'AL', 'IE', 'SE', 'Ei', 'Et', 'S_canopy', 'pot_inf']
+    for field in fields:
+        OUT[field] = weight_A * OUT_A[field] + weight_B * OUT_B[field]
 
+    # Assuming these are constants across A and B
+    OUT['P'] = OUT_A['P']
+    OUT['Ep'] = OUT_A['Ep']
+
+    return OUT
