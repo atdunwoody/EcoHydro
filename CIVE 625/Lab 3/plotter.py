@@ -64,10 +64,10 @@ def plot_FDC(datasets):
     #unpack label : data from datasets dictionary
     for i, (label, data) in enumerate(datasets.items()):
         QT_sorted = np.sort(data)[::-1]  # Sort data in descending order
+        QT_sorted = np.sort(data)
         permanence = np.arange(1, len(QT_sorted) + 1) / len(QT_sorted)  # Calculate permanence
         curve_color = '-r' if i == 0 else '-k'  # Set curve color based on index
         plt.semilogy(permanence, QT_sorted, curve_color, linewidth=1, label=label)
-
 
     plt.ylabel('Q (mm/d)')
     plt.xlabel('% of Time Exceeded')
