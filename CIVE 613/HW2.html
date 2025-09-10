@@ -8032,7 +8032,7 @@ reference sites you have also determined the width to depth ratio of the channel
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -8109,13 +8109,13 @@ reference sites you have also determined the width to depth ratio of the channel
 <span class="n">S</span> <span class="o">=</span> <span class="mf">0.0005</span>
 
 <span class="k">def</span> <span class="nf">Q_manning</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Compute discharge (cfs) through a rectangular channel of depth d (m)</span>
+<span class="w">    </span><span class="sd">"""Compute discharge (cfs) through a rectangular channel of depth d (ft)</span>
 <span class="sd">    using the Manning equation."""</span>
-    <span class="n">width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">d</span>        <span class="c1"># channel width (m)</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="n">d</span>        <span class="c1"># cross-sectional area (m^2)</span>
-    <span class="n">P</span> <span class="o">=</span> <span class="n">width</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">d</span>    <span class="c1"># wetted perimeter (m)</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">d</span>        <span class="c1"># channel width (ft)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="n">d</span>        <span class="c1"># cross-sectional area (ft^2)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">width</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">d</span>    <span class="c1"># wetted perimeter (ft)</span>
     <span class="n">R</span> <span class="o">=</span> <span class="n">A</span> <span class="o">/</span> <span class="n">P</span>
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.486</span><span class="o">/</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span> <span class="o">*</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
 
 <span class="c1"># Solve for the channel depth 'd' such that Q_manning(d) equals Q_target.</span>
 <span class="n">d_initial_guess</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># initial guess for the channel depth in meters</span>
@@ -8162,7 +8162,7 @@ reference sites you have also determined the width to depth ratio of the channel
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Create a single figure no subplot</span>
@@ -8217,7 +8217,7 @@ reference sites you have also determined the width to depth ratio of the channel
 <p>The design process is based on solving the hydraulic equations that govern open channel flow.</p>
 <ol>
 <li><p><strong>Manning’s Equation:</strong></p>
-<p>$$Q = \frac{1}{n} A R^{2/3} S^{1/2}$$</p>
+<p>$$Q = \frac{1.486}{n} A R^{2/3} S^{1/2}$$</p>
 <p>In this equation:</p>
 <ul>
 <li>$n$ is Manning’s roughness coefficient,</li>
@@ -8252,10 +8252,14 @@ reference sites you have also determined the width to depth ratio of the channel
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Design depth: </span><span class="si">{</span><span class="n">design_depth</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Convert ft to m for depth and width</span>
+<span class="n">design_depth</span> <span class="o">=</span> <span class="n">design_depth</span> <span class="o">*</span> <span class="mf">0.3048</span>  <span class="c1"># convert ft to m</span>
+<span class="n">design_width</span> <span class="o">=</span> <span class="n">design_width</span> <span class="o">*</span> <span class="mf">0.3048</span>  <span class="c1"># convert ft to m</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Design depth: </span><span class="si">{</span><span class="n">design_depth</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Design width: </span><span class="si">{</span><span class="n">design_width</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -8269,8 +8273,8 @@ reference sites you have also determined the width to depth ratio of the channel
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Design depth: 3.80 m
-Design width: 11.41 m
+<pre>Design depth: 1.00 m
+Design width: 3.00 m
 </pre>
 </div>
 </div>
